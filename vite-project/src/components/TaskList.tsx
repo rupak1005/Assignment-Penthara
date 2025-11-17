@@ -1,12 +1,5 @@
-/**
- * TaskList Component
- * 
- * Component for displaying a list of tasks with filtering support.
- * Handles task status filtering and empty state display.
- */
-
-import React from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertCircle, Grid, List } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Task } from '@/services/taskService';
@@ -21,10 +14,6 @@ interface TaskListProps {
   onAddTask: () => void;
 }
 
-/**
- * TaskList component for displaying filtered tasks
- * @param {TaskListProps} props - Component props
- */
 const TaskList: React.FC<TaskListProps> = ({
   tasks,
   filter,
@@ -33,17 +22,14 @@ const TaskList: React.FC<TaskListProps> = ({
   onDelete,
   onAddTask,
 }) => {
-  /**
-   * Filters tasks based on current filter status
-   * @returns {Task[]} Filtered array of tasks
-   */
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
   const getFilteredTasks = (): Task[] => {
     switch (filter) {
       case 'completed':
         return tasks.filter((task) => task.completed);
       case 'pending':
         return tasks.filter((task) => !task.completed);
-      case 'all':
       default:
         return tasks;
     }
@@ -51,43 +37,40 @@ const TaskList: React.FC<TaskListProps> = ({
 
   const filteredTasks = getFilteredTasks();
 
-  /**
-   * Gets empty state message based on filter
-   * @returns {Object} Empty state message and description
-   */
   const getEmptyStateMessage = () => {
     switch (filter) {
       case 'completed':
         return {
           title: 'No completed tasks',
-          description: 'Complete some tasks to see them here',
+          description: 'Mark some tasks as completed to see them here.',
         };
       case 'pending':
         return {
           title: 'No pending tasks',
-          description: 'All your tasks are completed! Great job!',
+          description: 'You have completed all your tasks. Great work!',
         };
       default:
         return {
           title: 'No tasks found',
-          description: 'Create a new task to get started',
+          description: 'Create your first task to get started.',
         };
     }
   };
 
   if (filteredTasks.length === 0) {
     const emptyState = getEmptyStateMessage();
-    
     return (
-      <Card className="py-12">
-        <CardContent className="text-center">
-          <AlertCircle size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">
+      <Card className="py-10 sm:py-14 px-4 sm:px-6 shadow-sm dark:shadow-none border-[1.5px] dark:border-gray-700">
+        <CardContent className="text-center flex flex-col items-center">
+          <AlertCircle className="text-gray-400 dark:text-gray-500 mb-3 sm:mb-4" size={40} />
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {emptyState.title}
           </h3>
-          <p className="text-gray-500 mb-4">{emptyState.description}</p>
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-5 sm:mb-6 max-w-md px-4">
+            {emptyState.description}
+          </p>
           {filter === 'all' && (
-            <Button onClick={onAddTask}>
+            <Button onClick={onAddTask} variant="default" className="w-full sm:w-auto">
               Add Your First Task
             </Button>
           )}
@@ -97,19 +80,62 @@ const TaskList: React.FC<TaskListProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredTasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          onToggleComplete={onToggleComplete}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
+    <div>
+      {/* View Toggle */}
+      <div className="flex justify-between sm:justify-end items-center mb-4 gap-2">
+        <div className="sm:hidden text-sm text-gray-600 dark:text-gray-400 font-medium">
+          {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('grid')}
+            aria-label="Grid View"
+            className="h-9 w-9 sm:h-10 sm:w-10"
+          >
+            <Grid size={18} className="sm:w-5 sm:h-5" />
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('list')}
+            aria-label="List View"
+            className="h-9 w-9 sm:h-10 sm:w-10"
+          >
+            <List size={18} className="sm:w-5 sm:h-5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Task List */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 animate-fadeIn">
+          {filteredTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggleComplete={onToggleComplete}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col space-y-2 sm:space-y-3 animate-fadeIn">
+          {filteredTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggleComplete={onToggleComplete}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
 export default TaskList;
-

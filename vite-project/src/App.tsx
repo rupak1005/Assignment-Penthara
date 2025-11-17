@@ -6,12 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
+
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardPage from './pages/DashboardPage';
 import TasksPage from './pages/TasksPage';
 import CalendarPage from './pages/CalendarPage';
 import './App.css';
+
 
 /**
  * App component - Root component of the application
@@ -21,6 +23,7 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -43,6 +46,28 @@ const App: React.FC = () => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Detect mobile devices and set sidebar to closed by default on mobile
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768; // md breakpoint
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Check on resize
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const handleToggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
@@ -53,6 +78,10 @@ const App: React.FC = () => {
    */
   const handleViewChange = (view: string) => {
     setCurrentView(view);
+    // Close sidebar on mobile after navigation
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
   };
 
   /**
@@ -88,6 +117,14 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Backdrop overlay for mobile */}
+      {isMobile && isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <Sidebar
         currentView={currentView}
@@ -97,7 +134,11 @@ const App: React.FC = () => {
       />
 
       {/* Main content area with header */}
-      <div className={`transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-16"}`}>
+      <div className={`transition-all duration-300 ml-0 ${
+        isSidebarOpen 
+          ? 'md:ml-64' 
+          : 'md:ml-16'
+      }`}>
         {/* Header */}
         <Header
           searchQuery={searchQuery}

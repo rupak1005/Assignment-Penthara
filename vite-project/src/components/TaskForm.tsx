@@ -1,12 +1,19 @@
 /**
  * TaskForm Component
  * 
- * Form component for creating and editing tasks.
- * Handles task input validation and submission.
+ * Styled and spacing-fixed version.
  */
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,168 +33,171 @@ interface TaskFormProps {
   task?: Task | null;
 }
 
-/**
- * TaskForm component for adding and editing tasks
- * @param {TaskFormProps} props - Component props
- */
 const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, task }) => {
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
     dueDate: '',
-    priority: 'medium',
+    priority: 'medium'
   });
 
-  // Reset form when dialog opens/closes or task changes
   useEffect(() => {
     if (isOpen) {
       if (task) {
-        // Edit mode: populate form with task data
         setFormData({
           title: task.title,
           description: task.description || '',
           dueDate: task.dueDate || '',
-          priority: task.priority,
+          priority: task.priority
         });
       } else {
-        // Add mode: reset form
         setFormData({
           title: '',
           description: '',
           dueDate: '',
-          priority: 'medium',
+          priority: 'medium'
         });
       }
     }
   }, [isOpen, task]);
 
-  /**
-   * Handles form input changes
-   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>} e - Input change event
-   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
-  /**
-   * Handles form submission
-   * @param {React.FormEvent} e - Form submit event
-   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate title is not empty
-    if (!formData.title.trim()) {
-      return;
-    }
+    if (!formData.title.trim()) return;
 
     onSubmit(formData);
     onClose();
   };
 
-  /**
-   * Handles form cancellation
-   */
   const handleCancel = () => {
     setFormData({
       title: '',
       description: '',
       dueDate: '',
-      priority: 'medium',
+      priority: 'medium'
     });
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{task ? 'Edit Task' : 'Add New Task'}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="p-6 sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-xl font-semibold">
+            {task ? 'Edit Task' : 'Add New Task'}
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             {task
-              ? 'Update your task details below'
-              : 'Create a new task to manage your work'}
+              ? 'Update the task details below'
+              : 'Fill the information to create a new task'}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            <div>
-              <label htmlFor="title" className="text-sm font-medium mb-2 block">
-                Task Title <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="Enter task title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="description" className="text-sm font-medium mb-2 block">
-                Description
-              </label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder="Enter task description (optional)"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="dueDate" className="text-sm font-medium mb-2 block">
-                Due Date
-              </label>
-              <Input
-                id="dueDate"
-                name="dueDate"
-                type="date"
-                value={formData.dueDate}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="priority" className="text-sm font-medium mb-2 block">
-                Priority
-              </label>
-              <select
-                id="priority"
-                name="priority"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.priority}
-                onChange={handleChange}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Title */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="title"
+              className="text-sm font-medium block dark:text-gray-200"
+            >
+              Task Title <span className="text-red-500">*</span>
+            </label>
+            <Input
+              id="title"
+              name="title"
+              placeholder="Enter task title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="h-10"
+            />
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleCancel}>
+          {/* Description */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="description"
+              className="text-sm font-medium block dark:text-gray-200"
+            >
+              Description
+            </label>
+            <Textarea
+              id="description"
+              name="description"
+              placeholder="Enter description (optional)"
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
+              className="resize-none"
+            />
+          </div>
+
+          {/* Due Date */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="dueDate"
+              className="text-sm font-medium block dark:text-gray-200"
+            >
+              Due Date
+            </label>
+            <Input
+              id="dueDate"
+              name="dueDate"
+              type="date"
+              value={formData.dueDate}
+              onChange={handleChange}
+              className="h-10"
+            />
+          </div>
+
+          {/* Priority */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="priority"
+              className="text-sm font-medium block dark:text-gray-200"
+            >
+              Priority
+            </label>
+            <select
+              id="priority"
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              className="w-full h-10 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 dark:text-gray-200 bg-white dark:bg-sidebar-accent focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          {/* Footer */}
+          <DialogFooter className="mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              className="px-4"
+            >
               Cancel
             </Button>
-            <Button type="submit">{task ? 'Update Task' : 'Add Task'}</Button>
+            <Button type="submit" className="px-5">
+              {task ? 'Update Task' : 'Add Task'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
 };
-
 export default TaskForm;
-

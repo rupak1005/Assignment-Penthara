@@ -1,150 +1,72 @@
-/**
- * TaskItem Component
- * 
- * Individual task item component displaying task details.
- * Handles task completion toggle and action buttons.
- */
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Pencil, Trash } from "lucide-react";
+import type { Task } from "@/services/taskService";
 
-import React from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import type { Task } from '@/services/taskService';
+const priorityStyles: Record<string, string> = {
+  low: "bg-green-100 text-green-700 border border-green-300",
+  medium: "bg-yellow-100 text-yellow-700 border border-yellow-300",
+  high: "bg-red-100 text-red-700 border border-red-300",
+};
 
-interface TaskItemProps {
+interface Props {
   task: Task;
   onToggleComplete: (id: string) => void;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }
 
-/**
- * TaskItem component for displaying individual tasks
- * @param {TaskItemProps} props - Component props
- */
-const TaskItem: React.FC<TaskItemProps> = ({
-  task,
-  onToggleComplete,
-  onEdit,
-  onDelete,
-}) => {
-  /**
-   * Handles checkbox change to toggle task completion
-   */
-  const handleCheckboxChange = () => {
-    onToggleComplete(task.id);
-  };
-
-  /**
-   * Handles edit button click
-   */
-  const handleEdit = () => {
-    onEdit(task);
-  };
-
-  /**
-   * Handles delete button click
-   */
-  const handleDelete = () => {
-    onDelete(task);
-  };
-
-  /**
-   * Gets priority badge variant based on priority level
-   * @param {string} priority - Task priority level
-   * @returns {string} Badge variant name
-   */
-  const getPriorityVariant = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'destructive';
-      case 'medium':
-        return 'secondary';
-      case 'low':
-        return 'outline';
-      default:
-        return 'outline';
-    }
-  };
-
-  /**
-   * Formats date string for display
-   * @param {string} dateString - ISO date string
-   * @returns {string} Formatted date string
-   */
-  const formatDate = (dateString?: string): string => {
-    if (!dateString) return '';
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch {
-      return dateString;
-    }
-  };
-
+const TaskItem: React.FC<Props> = ({ task, onToggleComplete, onEdit, onDelete }) => {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex items-start gap-3">
-          <Checkbox
-            checked={task.completed}
-            onChange={handleCheckboxChange}
-            className="mt-1"
-            aria-label={`Mark "${task.title}" as ${task.completed ? 'pending' : 'complete'}`}
-          />
-          <div className="flex-1">
-            <CardTitle
-              className={`text-lg font-bold ${
-                task.completed ? 'line-through text-gray-400' : 'text-gray-900'
-              }`}
-            >
-              {task.title}
-            </CardTitle>
-            {task.description && (
-              <CardDescription className="mt-2 text-gray-600">
-                {task.description}
-              </CardDescription>
-            )}
-            {task.dueDate && (
-              <p className="text-sm text-gray-500 mt-2">
-                Due: {formatDate(task.dueDate)}
-              </p>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="pt-0">
+    <Card
+      className={`
+        shadow-sm border rounded-xl transition hover:shadow-md
+        ${task.completed ? "opacity-70" : "opacity-100"}
+      `}
+    >
+      <CardContent className="p-5 space-y-4">
+        
+        {/* Title & Priority */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleEdit}
-              className="h-8 w-8"
-              aria-label={`Edit task: ${task.title}`}
-            >
-              <Edit2 size={16} className="text-gray-600" />
+          <h3 className="text-lg font-semibold">{task.title}</h3>
+
+          {/* Priority Badge */}
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${priorityStyles[task.priority]}`}
+          >
+            {task.priority.toUpperCase()}
+          </span>
+        </div>
+
+        {/* Description */}
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {task.description}
+        </p>
+
+        {/* Actions */}
+        <div className="flex justify-between items-center pt-2">
+          <Button
+            size="sm"
+            variant={task.completed ? "secondary" : "default"}
+            onClick={() => onToggleComplete(task.id)}
+          >
+            {task.completed ? "Completed" : "Mark Done"}
+          </Button>
+
+          <div className="flex gap-2">
+            <Button size="icon" variant="outline" onClick={() => onEdit(task)}>
+              <Pencil size={16} />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDelete}
-              className="h-8 w-8"
-              aria-label={`Delete task: ${task.title}`}
-            >
-              <Trash2 size={16} className="text-gray-600" />
+            <Button size="icon" variant="destructive" onClick={() => onDelete(task)}>
+              <Trash size={16} />
             </Button>
           </div>
-          <Badge variant={getPriorityVariant(task.priority) as any} className="bg-gray-200 text-gray-700">
-            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-          </Badge>
         </div>
+
       </CardContent>
     </Card>
   );
 };
 
 export default TaskItem;
-

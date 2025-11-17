@@ -1,8 +1,9 @@
 /**
  * CalendarPage Component
- * 
- * Calendar view with task indicators and upcoming tasks.
- * Displays calendar with dots on dates where tasks are scheduled.
+ * Calendar view with:
+ *  - Task indicators on dates
+ *  - Upcoming tasks
+ *  - Click a date to view tasks for that day
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -13,225 +14,202 @@ import { Button } from '@/components/ui/button';
 import { getTasks } from '@/services/taskService';
 import type { Task } from '@/services/taskService';
 
-/**
- * CalendarPage component for displaying calendar with task indicators
- */
 const CalendarPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  // Load tasks from localStorage
+  /** Load tasks */
   useEffect(() => {
-    const loadedTasks = getTasks();
-    setTasks(loadedTasks);
+    const loaded = getTasks();
+    setTasks(loaded);
   }, []);
 
-  /**
-   * Gets tasks for a specific date
-   * @param {Date} date - Date to get tasks for
-   * @returns {Task[]} Array of tasks for that date
-   */
+  /** Helper: tasks for a particular date */
   const getTasksForDate = (date: Date): Task[] => {
-    const dateStr = date.toISOString().split('T')[0];
-    return tasks.filter((task) => {
-      if (!task.dueDate) return false;
-      return task.dueDate === dateStr;
-    });
+    const dateStr = date.toISOString().split("T")[0];
+    return tasks.filter((t) => t.dueDate === dateStr);
   };
 
-  /**
-   * Checks if a date has tasks
-   * @param {Date} date - Date to check
-   * @returns {boolean} True if date has tasks
-   */
-  const hasTasks = (date: Date): boolean => {
-    return getTasksForDate(date).length > 0;
-  };
-
-  /**
-   * Gets task count for a date
-   * @param {Date} date - Date to get task count for
-   * @returns {number} Number of tasks for that date
-   */
-  const getTaskCount = (date: Date): number => {
-    return getTasksForDate(date).length;
-  };
-
-  /**
-   * Navigates to previous month
-   */
-  const goToPreviousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-  };
-
-  /**
-   * Navigates to next month
-   */
-  const goToNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-  };
-
-  /**
-   * Navigates to today
-   */
-  const goToToday = () => {
-    setCurrentDate(new Date());
-  };
-
-  /**
-   * Gets calendar days for current month
-   * @returns {Array} Array of calendar days
-   */
+  /** Calendar Grid Generation */
   const calendarDays = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
 
-    const days: Array<{ date: Date; isCurrentMonth: boolean; isToday: boolean }> = [];
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const daysInMonth = last.getDate();
+    const startOffset = first.getDay();
 
-    // Previous month's trailing days
-    const prevMonth = new Date(year, month - 1, 0);
-    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-      const date = new Date(year, month - 1, prevMonth.getDate() - i);
-      days.push({ date, isCurrentMonth: false, isToday: false });
-    }
-
-    // Current month's days
     const today = new Date();
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
+
+    const grid: {
+      date: Date;
+      isCurrentMonth: boolean;
+      isToday: boolean;
+    }[] = [];
+
+    /** Previous Month Padding */
+    const prevMonthLast = new Date(year, month, 0);
+    for (let i = startOffset - 1; i >= 0; i--) {
+      const d = new Date(year, month - 1, prevMonthLast.getDate() - i);
+      grid.push({ date: d, isCurrentMonth: false, isToday: false });
+    }
+
+    /** Current Month */
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
       const isToday =
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear();
-      days.push({ date, isCurrentMonth: true, isToday });
+        dateObj.getDate() === today.getDate() &&
+        dateObj.getMonth() === today.getMonth() &&
+        dateObj.getFullYear() === today.getFullYear();
+
+      grid.push({
+        date: dateObj,
+        isCurrentMonth: true,
+        isToday,
+      });
     }
 
-    // Next month's leading days
-    const remainingDays = 42 - days.length; // 6 weeks * 7 days
-    for (let day = 1; day <= remainingDays; day++) {
-      const date = new Date(year, month + 1, day);
-      days.push({ date, isCurrentMonth: false, isToday: false });
+    /** Next Month Padding */
+    while (grid.length < 42) {
+      const d = new Date(year, month + 1, grid.length - (startOffset + daysInMonth) + 1);
+      grid.push({ date: d, isCurrentMonth: false, isToday: false });
     }
 
-    return days;
+    return grid;
   }, [currentDate]);
 
-  /**
-   * Gets upcoming tasks sorted by due date
-   * @returns {Task[]} Array of upcoming tasks
-   */
-  const getUpcomingTasks = (): Task[] => {
+  /** Selected date task list */
+  const selectedDayTasks = useMemo(() => {
+    if (!selectedDate) return [];
+    return getTasksForDate(selectedDate);
+  }, [selectedDate, tasks]);
+
+  /** Upcoming tasks list */
+  const getUpcomingTasks = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     return tasks
-      .filter((task) => {
-        if (!task.dueDate || task.completed) return false;
-        const dueDate = new Date(task.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-        return dueDate >= today;
+      .filter((t) => {
+        if (!t.dueDate || t.completed) return false;
+        const due = new Date(t.dueDate);
+        due.setHours(0, 0, 0, 0);
+        return due >= today;
       })
-      .sort((a, b) => {
-        if (!a.dueDate || !b.dueDate) return 0;
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      })
+      .sort((a, b) => +new Date(a.dueDate!) - +new Date(b.dueDate!))
       .slice(0, 10);
   };
 
-  /**
-   * Gets priority badge variant
-   * @param {string} priority - Task priority
-   * @returns {string} Badge variant
-   */
+  const upcomingTasks = getUpcomingTasks();
+
   const getPriorityVariant = (priority: string) => {
     switch (priority) {
-      case 'high':
-        return 'destructive';
-      case 'medium':
-        return 'secondary';
-      case 'low':
-        return 'outline';
+      case "high":
+        return "destructive";
+      case "medium":
+        return "secondary";
+      case "low":
+        return "outline";
       default:
-        return 'outline';
+        return "outline";
     }
   };
 
-  const monthYear = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const upcomingTasks = getUpcomingTasks();
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthYear = currentDate.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-3xl font-bold text-gray-900">Calendar</h2>
-        <Button onClick={goToToday} variant="outline">
+        <h2 className="text-3xl font-bold dark:text-gray-100">Calendar</h2>
+        <Button variant="outline" onClick={() => {setCurrentDate(new Date()); setSelectedDate(new Date());}}>
           Today
         </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar */}
+
+        {/* Calendar Card */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold">{monthYear}</CardTitle>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={goToPreviousMonth}>
+              <CardTitle>{monthYear}</CardTitle>
+
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" onClick={() =>
+                  setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
+                }>
                   <ChevronLeft size={20} />
                 </Button>
-                <Button variant="outline" size="icon" onClick={goToNextMonth}>
+
+                <Button variant="outline" size="icon" onClick={() =>
+                  setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
+                }>
                   <ChevronRight size={20} />
                 </Button>
               </div>
             </div>
           </CardHeader>
+
           <CardContent>
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {weekDays.map((day) => (
-                <div key={day} className="text-center text-sm font-semibold text-gray-600 p-2">
-                  {day}
+
+            {/* Week Days */}
+            <div className="grid grid-cols-7 mb-2">
+              {weekDays.map((d) => (
+                <div
+                  key={d}
+                  className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 p-2"
+                >
+                  {d}
                 </div>
               ))}
             </div>
+
+            {/* Calendar Days */}
             <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((dayInfo, index) => {
-                const tasksCount = hasTasks(dayInfo.date) ? getTaskCount(dayInfo.date) : 0;
+              {calendarDays.map((day, idx) => {
+                const taskList = getTasksForDate(day.date);
+                const isSelected =
+                  selectedDate &&
+                  day.date.toDateString() === selectedDate.toDateString();
 
                 return (
                   <div
-                    key={index}
+                    key={idx}
+                    onClick={() => setSelectedDate(day.date)}
                     className={`
-                      relative min-h-[80px] p-2 border rounded-md
-                      ${dayInfo.isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
-                      ${dayInfo.isToday ? 'ring-2 ring-blue-500' : ''}
-                      hover:bg-gray-100 cursor-pointer transition-colors
+                      p-2 min-h-[80px] border rounded-md cursor-pointer transition-all
+                      ${day.isCurrentMonth ? "bg-white dark:bg-sidebar-accent" : "bg-gray-50 dark:bg-sidebar-accent/30"}
+                      ${day.isToday ? "ring-2 ring-blue-500" : ""}
+                      ${isSelected ? "ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20" : ""}
+                      hover:bg-gray-100 dark:hover:bg-sidebar-accent/70
                     `}
                   >
                     <div
                       className={`
-                        text-sm font-medium mb-1
-                        ${dayInfo.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}
-                        ${dayInfo.isToday ? 'text-blue-600 font-bold' : ''}
+                        text-sm font-semibold
+                        ${day.isToday ? "text-blue-600" : ""}
+                        ${day.isCurrentMonth ? "text-gray-900 dark:text-gray-100" : "text-gray-400"}
                       `}
                     >
-                      {dayInfo.date.getDate()}
+                      {day.date.getDate()}
                     </div>
-                    {tasksCount > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {Array.from({ length: Math.min(tasksCount, 3) }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="w-2 h-2 rounded-full bg-blue-500"
-                            title={`${tasksCount} task(s) on this date`}
-                          />
+
+                    {/* task dots */}
+                    {taskList.length > 0 && (
+                      <div className="flex gap-1 mt-2 flex-wrap">
+                        {taskList.slice(0, 3).map((_, i) => (
+                          <div key={i} className="w-2 h-2 rounded-full bg-blue-500" />
                         ))}
-                        {tasksCount > 3 && (
-                          <span className="text-xs text-gray-500">+{tasksCount - 3}</span>
+                        {taskList.length > 3 && (
+                          <span className="text-xs text-gray-500">+{taskList.length - 3}</span>
                         )}
                       </div>
                     )}
@@ -239,56 +217,86 @@ const CalendarPage: React.FC = () => {
                 );
               })}
             </div>
+
           </CardContent>
         </Card>
 
         {/* Upcoming Tasks */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Upcoming Tasks</CardTitle>
+            <CardTitle>Upcoming Tasks</CardTitle>
           </CardHeader>
           <CardContent>
             {upcomingTasks.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <p>No upcoming tasks</p>
-              </div>
+              <p className="text-center text-gray-500 py-8">No upcoming tasks</p>
             ) : (
               <div className="space-y-4 max-h-[600px] overflow-y-auto">
                 {upcomingTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold text-gray-900">{task.title}</h4>
-                      <Badge variant={getPriorityVariant(task.priority) as any} className="ml-2">
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                  <div key={task.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-sidebar-accent transition">
+                    <div className="flex justify-between mb-2">
+                      <h4 className="font-semibold">{task.title}</h4>
+                      <Badge variant={getPriorityVariant(task.priority) as any}>
+                        {task.priority}
                       </Badge>
                     </div>
+
                     {task.description && (
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {task.description}
-                      </p>
+                      <p className="text-sm text-gray-600">{task.description}</p>
                     )}
-                    {task.dueDate && (
-                      <p className="text-xs text-gray-500">
-                        Due: {new Date(task.dueDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </p>
-                    )}
+
+                    <p className="text-xs text-gray-500">
+                      Due: {new Date(task.dueDate!).toLocaleDateString()}
+                    </p>
                   </div>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* Selected Day Tasks */}
+        {selectedDate && (
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle>
+                Tasks on{" "}
+                {selectedDate.toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              {selectedDayTasks.length === 0 ? (
+                <p className="text-gray-500">No tasks for this day.</p>
+              ) : (
+                <div className="space-y-4">
+                  {selectedDayTasks.map((task) => (
+                    <div key={task.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-sidebar-accent transition">
+                      <div className="flex justify-between mb-2">
+                        <h4 className="font-semibold">{task.title}</h4>
+                        <Badge variant={getPriorityVariant(task.priority) as any}>
+                          {task.priority}
+                        </Badge>
+                      </div>
+
+                      <p className="text-sm text-gray-600">{task.description}</p>
+
+                      <p className="text-xs text-gray-500">Due: {task.dueDate}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
       </div>
     </div>
   );
 };
 
 export default CalendarPage;
-

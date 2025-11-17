@@ -23,18 +23,18 @@ interface HeaderProps {
  */
 const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, theme, onToggleTheme }) => {
   return (
-    <div className="bg-card border-b border-border px-8 py-4">
-      <div className="flex items-center justify-between">
-        {/* Search bar */}
-        <div className="flex-1 max-w-xl">
-          <div className="relative">
+    <div className="bg-card border-b border-border px-8 py-4 rounded-lg dark:bg-sidebar-accent">
+      <div className="flex items-center justify-between dark:text-gray-100">
+        {/* Search bar */} 
+        <div className="flex-1 max-w-xl dark:text-gray-100">
+          <div className="relative dark:text-gray-100">
             <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-400 rounded-full bg-gray-100  dark:bg-sidebar-accent"
               size={20}
             />
             <Input
               placeholder="Search tasks, projects, and teams"
-              className="pl-10 w-full"
+              className="pl-10 w-full dark:text-gray-100  bg-gray-100  dark:bg-sidebar-accent"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
             />
@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, theme, onT
         </div>
 
         {/* User actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 dark:text-gray-100">
           <Button
             variant="ghost"
             size="icon"
@@ -51,17 +51,17 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, theme, onT
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Notifications">
+          <Button variant="ghost" size="icon" aria-label="Notifications" className="dark:text-gray-100 md:block hidden sm:block md:block p-4 md:p-2 justify-center items-center">
             <Bell size={20} />
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Messages">
+          <Button variant="ghost" size="icon" aria-label="Messages" className="dark:text-gray-100 md:block hidden sm:block md:block p-4 md:p-2 justify-center items-center">
             <Mail size={20} />
           </Button>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-              <User size={20} className="text-foreground" />
+          <div className="flex items-center gap-2 dark:text-gray-100  ">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center dark:bg-sidebar-accent ">
+              <User size={20} className="text-foreground dark:text-gray-100" />
             </div>
-            <span className="text-sm font-medium text-foreground/80">Welcome to</span>
+            <span className="text-sm font-medium text-foreground/80 dark:text-gray-100">Welcome</span>
           </div>
         </div>
       </div>

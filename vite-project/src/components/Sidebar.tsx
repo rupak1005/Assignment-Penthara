@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Menu, BarChart3, CheckCircle2, Calendar, Users, Settings } from 'lucide-react';
+import { Menu, BarChart3, CheckCircle2, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
@@ -29,13 +29,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, on
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'tasks', label: 'My Tasks', icon: CheckCircle2 },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'team', label: 'Team', icon: Users },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    // { id: 'team', label: 'Team', icon: Users },
+    // { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
     <div
-      className={`fixed left-0 top-0 h-full bg-sidebar text-sidebar-foreground transition-all duration-300 z-40 border-r border-sidebar-border ${
+      className={`fixed left-0 top-0 h-full bg-sidebar text-sidebar-foreground transition-all duration-300 z-50 md:z-40 border-r border-sidebar-border ${
         isOpen ? 'w-64' : 'w-16'
       }`}
     >
