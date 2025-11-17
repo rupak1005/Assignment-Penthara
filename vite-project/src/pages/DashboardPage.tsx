@@ -9,11 +9,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MonochromeBarChart } from '@/components/ui/monochrome-bar-chart';
 import { ClippedAreaChart } from '@/components/ui/clipped-area-chart';
-import { GlowingRadialChart } from '@/components/ui/glowing-radial-chart';
 import { getTasks } from '@/services/taskService';
 import type { Task } from '@/services/taskService';
 
-const PRIORITY_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)'];
 
 /**
  * DashboardPage component for displaying task overview with analytics
@@ -38,24 +36,6 @@ const DashboardPage: React.FC = () => {
       pending: tasks.filter((task) => !task.completed).length,
       highPriority: tasks.filter((task) => task.priority === 'high' && !task.completed).length,
     };
-  };
-
-  /**
-   * Prepares data for priority chart
-   * @returns {Array} Chart data array
-   */
-  const getPriorityData = () => {
-    const priorities: Array<'high' | 'medium' | 'low'> = ['high', 'medium', 'low'];
-
-    return priorities.map((priority, index) => {
-      const count = tasks.filter((t) => t.priority === priority && !t.completed).length;
-      const name = priority.charAt(0).toUpperCase() + priority.slice(1);
-      return {
-        name,
-        value: count,
-        color: PRIORITY_COLORS[index % PRIORITY_COLORS.length],
-      };
-    });
   };
 
   /**
@@ -84,7 +64,6 @@ const DashboardPage: React.FC = () => {
   };
 
   const stats = getStats();
-  const priorityData = getPriorityData();
   const completionTrend = getCompletionTrend();
 
   const statusChartData = [
@@ -92,11 +71,6 @@ const DashboardPage: React.FC = () => {
     { name: 'Pending', value: stats.pending },
   ];
 
-  const priorityRadialData = priorityData.map((item) => ({
-    name: item.name,
-    value: item.value,
-    fill: item.color,
-  }));
 
   const completionTrendChange =
     completionTrend.length > 1 && completionTrend[0].completed !== 0
@@ -105,27 +79,21 @@ const DashboardPage: React.FC = () => {
         100
       : 0;
 
-  const radialTrend = stats.total ? (stats.completed / stats.total) * 100 : 0;
-
-  const priorityStats = {
-    total: priorityData.reduce((acc, item) => acc + item.value, 0),
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="mb-4">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <h2 className="text-3xl font-bold dark:text-sidebar-foreground text-gray-900 mb-2">
           Good morning, User
         </h2>
-        <p className="text-gray-600">Manage your tasks efficiently and effectively.</p>
+        <p className="text-gray-600 dark:text-gray-400">Manage your tasks efficiently and effectively.</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Total Tasks
             </CardTitle>
           </CardHeader>
@@ -136,7 +104,7 @@ const DashboardPage: React.FC = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Completed
             </CardTitle>
           </CardHeader>
@@ -147,7 +115,7 @@ const DashboardPage: React.FC = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Pending
             </CardTitle>
           </CardHeader>
@@ -158,7 +126,7 @@ const DashboardPage: React.FC = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 ">
               High Priority
             </CardTitle>
           </CardHeader>
@@ -190,15 +158,6 @@ const DashboardPage: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <GlowingRadialChart
-          data={priorityRadialData}
-          title="Priority Distribution"
-          subtitle={`${priorityStats.total} open tasks by priority`}
-          trend={radialTrend}
-          height={300}
-        />
-      </div>
     </div>
   );
 };

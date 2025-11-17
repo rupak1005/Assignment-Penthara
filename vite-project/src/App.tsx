@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('tasks');
   const [searchQuery, setSearchQuery] = useState('');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -80,18 +81,23 @@ const App: React.FC = () => {
         return (
           <div className="flex items-center justify-center h-64">
             <p className="text-muted-foreground">Coming soon...</p>
-          </div>
-        );
+    </div>
+  );
     }
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Sidebar */}
-      <Sidebar currentView={currentView} onViewChange={handleViewChange} />
+      <Sidebar
+        currentView={currentView}
+        onViewChange={handleViewChange}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen((prev) => !prev)}
+      />
 
       {/* Main content area with header */}
-      <div className="ml-64">
+      <div className={`transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-16"}`}>
         {/* Header */}
         <Header
           searchQuery={searchQuery}

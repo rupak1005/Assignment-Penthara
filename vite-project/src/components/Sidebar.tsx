@@ -5,21 +5,22 @@
  * Displays navigation options for the application.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Menu, BarChart3, CheckCircle2, Calendar, Users, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
   currentView: string;
   onViewChange: (view: string) => void;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 /**
  * Sidebar component for navigation
  * @param {SidebarProps} props - Component props
  */
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, onToggle }) => {
 
   /**
    * Navigation menu items
@@ -35,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
   return (
     <div
       className={`fixed left-0 top-0 h-full bg-sidebar text-sidebar-foreground transition-all duration-300 z-40 border-r border-sidebar-border ${
-        sidebarOpen ? 'w-64' : 'w-16'
+        isOpen ? 'w-64' : 'w-16'
       }`}
     >
       <div className="p-4">
@@ -44,12 +45,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={onToggle}
             className="h-10 w-10 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <Menu size={20} />
           </Button>
-            {sidebarOpen && (
+            {isOpen && (
               <h1 className="text-xl font-bold text-sidebar-foreground">TaskMaster</h1>
             )}
         </div>
@@ -65,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
                 key={item.id}
                 variant="ghost"
                 className={`w-full justify-start gap-3 text-sidebar-foreground ${
-                  !sidebarOpen && 'justify-center'
+                  !isOpen && 'justify-center'
                 } ${
                   isActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent'
@@ -74,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
                 onClick={() => onViewChange(item.id)}
               >
                 <Icon size={20} />
-                {sidebarOpen && <span>{item.label}</span>}
+                {isOpen && <span>{item.label}</span>}
               </Button>
             );
           })}
