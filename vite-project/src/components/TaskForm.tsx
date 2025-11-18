@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/dialog';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { AnimatedInput } from '@/components/ui/animated-input';
 import { Textarea } from '@/components/ui/textarea';
+import { Dropdown } from '@/components/ui/dropdown';
 import type { Task } from '@/services/taskService';
 
 export interface TaskFormData {
@@ -106,20 +107,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, task }) 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div className="space-y-1.5">
-            <label
-              htmlFor="title"
-              className="text-sm font-medium block dark:text-gray-200"
-            >
-              Task Title <span className="text-red-500">*</span>
-            </label>
-            <Input
+            <AnimatedInput
               id="title"
               name="title"
-              placeholder="Enter task title"
+              label="Task Title *"
               value={formData.title}
               onChange={handleChange}
               required
-              className="h-10"
             />
           </div>
 
@@ -144,19 +138,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, task }) 
 
           {/* Due Date */}
           <div className="space-y-1.5">
-            <label
-              htmlFor="dueDate"
-              className="text-sm font-medium block dark:text-gray-200"
-            >
-              Due Date
-            </label>
-            <Input
+            <AnimatedInput
               id="dueDate"
               name="dueDate"
               type="date"
+              label="Due Date"
               value={formData.dueDate}
               onChange={handleChange}
-              className="h-10"
             />
           </div>
 
@@ -164,21 +152,22 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, task }) 
           <div className="space-y-1.5">
             <label
               htmlFor="priority"
-              className="text-sm font-medium block dark:text-gray-200"
+              className="text-sm font-medium block dark:text-gray-200 mb-2"
             >
               Priority
             </label>
-            <select
-              id="priority"
-              name="priority"
+            <Dropdown
+              options={[
+                { value: 'low', label: 'Low' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'high', label: 'High' },
+              ]}
               value={formData.priority}
-              onChange={handleChange}
-              className="w-full h-10 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 dark:text-gray-200 bg-white dark:bg-sidebar-accent focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, priority: value as 'low' | 'medium' | 'high' }))
+              }
+              placeholder="Select priority"
+            />
           </div>
 
           {/* Footer */}

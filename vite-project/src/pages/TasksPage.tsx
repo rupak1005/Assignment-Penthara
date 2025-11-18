@@ -10,6 +10,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dropdown } from '@/components/ui/dropdown';
 import { getTasks, addTask, updateTask, deleteTask, toggleTaskComplete } from '@/services/taskService';
 import type { Task } from '@/services/taskService';
 import TaskList from '@/components/TaskList';
@@ -27,6 +28,7 @@ interface TasksPageProps {
 const TasksPage: React.FC<TasksPageProps> = ({ searchQuery = '' }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -159,22 +161,45 @@ const TasksPage: React.FC<TasksPageProps> = ({ searchQuery = '' }) => {
         </Button>
       </div>
 
-      <Tabs value={filter} onValueChange={(value: string) => setFilter(value as typeof filter)}>
-        <TabsList>
-          <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-          <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({stats.completed})</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <Tabs value={filter} onValueChange={(value: string) => setFilter(value as typeof filter)}>
+          <TabsList>
+            <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
+            <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
+            <TabsTrigger value="completed">Completed ({stats.completed})</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="w-full sm:w-auto sm:min-w-[200px]">
+          <Dropdown
+            options={[
+              { value: 'all', label: 'All Priorities' },
+              { value: 'high', label: 'High Priority' },
+              { value: 'medium', label: 'Medium Priority' },
+              { value: 'low', label: 'Low Priority' },
+            ]}
+            value={priorityFilter}
+            onChange={setPriorityFilter}
+            placeholder="Filter by priority"
+          />
+        </div>
+      </div>
 
       <TaskList
         tasks={tasks.filter((task) => {
+          // Search filter
           if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
-            return (
-              task.title.toLowerCase().includes(query) ||
-              (task.description && task.description.toLowerCase().includes(query))
-            );
+            if (
+              !task.title.toLowerCase().includes(query) &&
+              !(task.description && task.description.toLowerCase().includes(query))
+            ) {
+              return false;
+            }
+          }
+          // Priority filter
+          if (priorityFilter !== 'all' && task.priority !== priorityFilter) {
+            return false;
           }
           return true;
         })}

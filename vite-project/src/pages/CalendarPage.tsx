@@ -228,23 +228,23 @@ const CalendarPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             {upcomingTasks.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No upcoming tasks</p>
+              <p className="text-center text-gray-500 dark:text-gray-400 py-8">No upcoming tasks</p>
             ) : (
               <div className="space-y-4 max-h-[600px] overflow-y-auto">
                 {upcomingTasks.map((task) => (
                   <div key={task.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-sidebar-accent transition">
                     <div className="flex justify-between mb-2">
-                      <h4 className="font-semibold">{task.title}</h4>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{task.title}</h4>
                       <Badge variant={getPriorityVariant(task.priority) as any}>
                         {task.priority}
                       </Badge>
                     </div>
 
                     {task.description && (
-                      <p className="text-sm text-gray-600">{task.description}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
                     )}
 
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Due: {new Date(task.dueDate!).toLocaleDateString()}
                     </p>
                   </div>
@@ -271,21 +271,21 @@ const CalendarPage: React.FC = () => {
 
             <CardContent>
               {selectedDayTasks.length === 0 ? (
-                <p className="text-gray-500">No tasks for this day.</p>
+                <p className="text-gray-500 dark:text-gray-400">No tasks for this day.</p>
               ) : (
                 <div className="space-y-4">
                   {selectedDayTasks.map((task) => (
                     <div key={task.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-sidebar-accent transition">
                       <div className="flex justify-between mb-2">
-                        <h4 className="font-semibold">{task.title}</h4>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100">{task.title}</h4>
                         <Badge variant={getPriorityVariant(task.priority) as any}>
                           {task.priority}
                         </Badge>
                       </div>
 
-                      <p className="text-sm text-gray-600">{task.description}</p>
-
-                      <p className="text-xs text-gray-500">Due: {task.dueDate}</p>
+                      {task.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
+                      )}
                     </div>
                   ))}
                 </div>

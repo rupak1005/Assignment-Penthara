@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AlertCircle, Grid, List } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Accordion } from '@/components/ui/accordion';
 import type { Task } from '@/services/taskService';
 import TaskItem from './TaskItem';
 
@@ -36,6 +37,71 @@ const TaskList: React.FC<TaskListProps> = ({
   };
 
   const filteredTasks = getFilteredTasks();
+
+  // Group tasks by date for accordion
+  const groupedTasks = useMemo(() => {
+    const groups: { [key: string]: Task[] } = {
+      'Today': [],
+      'This Week': [],
+      'This Month': [],
+      'Later': [],
+      'No Date': [],
+    };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+    const monthFromNow = new Date(today);
+    monthFromNow.setMonth(monthFromNow.getMonth() + 1);
+
+    filteredTasks.forEach((task) => {
+      if (!task.dueDate) {
+        groups['No Date'].push(task);
+        return;
+      }
+
+      const dueDate = new Date(task.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+
+      if (dueDate.getTime() === today.getTime()) {
+        groups['Today'].push(task);
+      } else if (dueDate > today && dueDate <= weekFromNow) {
+        groups['This Week'].push(task);
+      } else if (dueDate > weekFromNow && dueDate <= monthFromNow) {
+        groups['This Month'].push(task);
+      } else {
+        groups['Later'].push(task);
+      }
+    });
+
+    return groups;
+  }, [filteredTasks]);
+
+  const accordionItems = useMemo(() => {
+    return Object.entries(groupedTasks)
+      .filter(([_, tasks]) => tasks.length > 0)
+      .map(([groupTitle, tasks]) => ({
+        title: `${groupTitle} (${tasks.length})`,
+        children: (
+          <div className={viewMode === 'grid' 
+            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
+            : "flex flex-col space-y-2 sm:space-y-3"
+          }>
+            {tasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                onToggleComplete={onToggleComplete}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </div>
+        ),
+        defaultOpen: groupTitle === 'Today' || groupTitle === 'This Week',
+      }));
+  }, [groupedTasks, viewMode, onToggleComplete, onEdit, onDelete]);
 
   const getEmptyStateMessage = () => {
     switch (filter) {
@@ -108,30 +174,38 @@ const TaskList: React.FC<TaskListProps> = ({
         </div>
       </div>
 
-      {/* Task List */}
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 animate-fadeIn">
-          {filteredTasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggleComplete={onToggleComplete}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
+      {/* Task List with Accordion Grouping */}
+      {accordionItems.length > 0 ? (
+        <div className="animate-fadeIn">
+          <Accordion items={accordionItems} allowMultiple={true} />
         </div>
       ) : (
-        <div className="flex flex-col space-y-2 sm:space-y-3 animate-fadeIn">
-          {filteredTasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggleComplete={onToggleComplete}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
+        <div className="animate-fadeIn">
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+              {filteredTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggleComplete={onToggleComplete}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col space-y-2 sm:space-y-3">
+              {filteredTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggleComplete={onToggleComplete}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

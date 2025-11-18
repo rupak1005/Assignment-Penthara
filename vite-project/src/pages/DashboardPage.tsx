@@ -14,11 +14,15 @@ import {
 } from "@/components/ui/card";
 import { MonochromeBarChart } from "@/components/ui/monochrome-bar-chart";
 import { ClippedAreaChart } from "@/components/ui/clipped-area-chart";
+import { AnimatedProgressBar } from "@/components/ui/animated-progress-bar";
+import { NumberFlow } from "@/components/ui/number-flow";
+import { DynamicIsland } from "@/components/ui/dynamic-island";
 import { getTasks } from "@/services/taskService";
 import type { Task } from "@/services/taskService";
 
 const DashboardPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [showNotification, setShowNotification] = useState(true);
 
   useEffect(() => {
     const loadedTasks = getTasks();
@@ -73,12 +77,37 @@ const DashboardPage: React.FC = () => {
         100
       : 0;
 
+  // Get upcoming tasks for Dynamic Island
+  const upcomingTasksCount = tasks.filter((t) => {
+    if (!t.dueDate || t.completed) return false;
+    const due = new Date(t.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    return due >= today && due <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  }).length;
+
   return (
     <div className="space-y-8 animate-fadeIn">
+      {/* Dynamic Island Notification */}
+      {upcomingTasksCount > 0 && (
+        <DynamicIsland
+          isVisible={showNotification}
+          onClose={() => setShowNotification(false)}
+          position="top"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">
+              {upcomingTasksCount} task{upcomingTasksCount !== 1 ? 's' : ''} due soon
+            </span>
+          </div>
+        </DynamicIsland>
+      )}
+
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-          Good morning, User
+          Welcome User
         </h2>
         <p className="text-gray-600 dark:text-gray-400 text-lg">
           Track your productivity and manage tasks efficiently.
@@ -96,7 +125,7 @@ const DashboardPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">
-              {stats.total}
+              <NumberFlow value={stats.total} />
             </div>
           </CardContent>
         </Card>
@@ -110,7 +139,7 @@ const DashboardPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold bg-gradient-to-r from-green-500 to-green-700 bg-clip-text text-transparent">
-              {stats.completed}
+              <NumberFlow value={stats.completed} />
             </div>
           </CardContent>
         </Card>
@@ -124,7 +153,7 @@ const DashboardPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-              {stats.pending}
+              <NumberFlow value={stats.pending} />
             </div>
           </CardContent>
         </Card>
@@ -138,11 +167,29 @@ const DashboardPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
-              {stats.highPriority}
+              <NumberFlow value={stats.highPriority} />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Progress Bar */}
+      <Card className="shadow-md dark:shadow-none">
+        <CardHeader>
+          <CardTitle className="font-semibold">Task Completion Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AnimatedProgressBar
+            value={stats.total > 0 ? (stats.completed / stats.total) * 100 : 0}
+            label="Overall Progress"
+            showLabel={true}
+            color="bg-green-500"
+          />
+          <p className="text-sm text-muted-foreground mt-2">
+            You've completed {stats.completed} out of {stats.total} tasks
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
