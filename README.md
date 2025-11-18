@@ -398,7 +398,7 @@ The application uses CSS custom properties for theming:
 - **Service Layer**: Business logic separated from UI
 - **Type Definitions**: TypeScript interfaces in service files
 
-## 🏗 Build & Deployment
+## Build & Deployment
 
 ### Production Build
 
