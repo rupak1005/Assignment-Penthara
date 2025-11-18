@@ -160,8 +160,8 @@ PentharaAssignment/
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd PentharaAssignment
+   git clone https://github.com/rupak1005/Assignment-Penthara.git
+   cd Assignment-Penthara
    ```
 
 2. **Install dependencies**
