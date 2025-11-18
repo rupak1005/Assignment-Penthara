@@ -2,7 +2,7 @@
 
 A sophisticated, feature-rich task management application built with React, TypeScript, and Vite. TaskMaster provides an intuitive interface for organizing, tracking, and managing tasks with beautiful UI components, real-time analytics, and seamless user experience.
 
-![TaskMaster](screenshots/dashboard.png)
+![TaskMaster](screenshots/myTasks.png)
 
 ## Table of Contents
 
@@ -438,10 +438,10 @@ Currently, no environment variables are required. All configuration is handled t
 ## Screenshots
 
 The project includes screenshots in the `/screenshots` directory:
-- Dashboard view
-- Calendar view
-- Tasks page
-- Light and dark mode examples
+- ![Dashboard view](/screenshots/dashboard.png)
+- ![Calendar view](/screenshots/calender.png)
+- ![Tasks page](/screenshots/myTasks.png)
+- ![Light and dark mode examples](screenshots/lightmode.png)
 
 ## Contributing
 
