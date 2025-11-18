@@ -19,10 +19,8 @@ const NumberFlow: React.FC<NumberFlowProps> = ({
   decimals = 0,
 }) => {
   const [displayValue, setDisplayValue] = React.useState(0)
-  const [isAnimating, setIsAnimating] = React.useState(false)
 
   React.useEffect(() => {
-    setIsAnimating(true)
     const startValue = displayValue
     const endValue = value
     const difference = endValue - startValue
@@ -41,7 +39,6 @@ const NumberFlow: React.FC<NumberFlowProps> = ({
       if (progress < 1) {
         requestAnimationFrame(animate)
       } else {
-        setIsAnimating(false)
       }
     }
 
