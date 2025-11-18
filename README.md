@@ -70,7 +70,7 @@ TaskMaster is a modern, single-page application designed to help users efficient
 - **Mobile Optimized**: Touch-friendly interface for mobile devices
 - **Smooth Animations**: Number flow animations, progress bars, and transitions
 
-## 🛠 Technology Stack
+## Technology Stack
 
 ### Core Technologies
 
