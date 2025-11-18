@@ -23,7 +23,7 @@ interface HeaderProps {
  */
 const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, theme, onToggleTheme }) => {
   return (
-    <div className="bg-card border-b  bg-sidebar border-border px-8 py-4 rounded-lg dark:bg-sidebar ">
+    <div className="bg-card border-b bg-sidebar border-border px-8 py-4 rounded-lg dark:bg-sidebar ">
       <div className="flex items-center justify-between dark:text-gray-100">
         {/* Search bar */} 
         <div className="flex-1 max-w-xl dark:text-gray-100">

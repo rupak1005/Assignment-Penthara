@@ -29,7 +29,7 @@ const TaskItem: React.FC<Props> = ({ task, onToggleComplete, onEdit, onDelete })
   return (
     <Card
       className={`
-        group flex  w-full flex-col rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm
+        group flex  min-w-[200px] flex-col rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm
         shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg
         ${task.completed ? "opacity-70" : "opacity-100"}
       `}
