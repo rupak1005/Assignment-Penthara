@@ -23,7 +23,7 @@ interface HeaderProps {
  */
 const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, theme, onToggleTheme }) => {
   return (
-    <div className="bg-card border-b border-border px-8 py-4 rounded-lg dark:bg-sidebar-accent">
+    <div className="bg-card border-b  bg-sidebar border-border px-8 py-4 rounded-lg dark:bg-sidebar ">
       <div className="flex items-center justify-between dark:text-gray-100">
         {/* Search bar */} 
         <div className="flex-1 max-w-xl dark:text-gray-100">
@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, theme, onT
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Notifications" className="dark:text-gray-100 md:block hidden sm:block md:block p-4 md:p-2 justify-center items-center">
+          <Button variant="ghost" size="icon" aria-label="Notifications" className="dark:text-gray-100 md:block hidden sm:block md:block p66666a-4 md:p-2 justify-center items-center">
             <Bell size={20} />
           </Button>
           <Button variant="ghost" size="icon" aria-label="Messages" className="dark:text-gray-100 md:block hidden sm:block md:block p-4 md:p-2 justify-center items-center">

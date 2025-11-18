@@ -1,13 +1,14 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Pencil, Trash, CalendarDays, CheckCircle2 } from "lucide-react";
 import type { Task } from "@/services/taskService";
 
 const priorityStyles: Record<string, string> = {
-  low: "bg-green-100 text-green-700 border border-green-300",
-  medium: "bg-yellow-100 text-yellow-700 border border-yellow-300",
-  high: "bg-red-100 text-red-700 border border-red-300",
+  low: "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-200",
+  medium: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/20 dark:text-amber-200",
+  high: "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-200",
 };
 
 interface Props {
@@ -18,53 +19,99 @@ interface Props {
 }
 
 const TaskItem: React.FC<Props> = ({ task, onToggleComplete, onEdit, onDelete }) => {
+  const formattedDueDate = task.dueDate
+    ? new Date(task.dueDate).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
   return (
     <Card
       className={`
-        shadow-sm border rounded-xl transition hover:shadow-md
+        group flex  w-full flex-col rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm
+        shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg
         ${task.completed ? "opacity-70" : "opacity-100"}
       `}
     >
-      <CardContent className="p-5 space-y-4">
-        
-        {/* Title & Priority */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{task.title}</h3>
+      <CardContent className="flex h-full flex-col gap-4 px-4 py-4 sm:px-5 sm:py-5 overflow-hidden">
 
-          {/* Priority Badge */}
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${priorityStyles[task.priority]}`}
-          >
-            {task.priority.toUpperCase()}
-          </span>
-        </div>
+{/* Title & Priority */}
+<div className="flex items-start justify-between gap-3">
+  <div className="space-y-1.5">
+    <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight line-clamp-2">
+      {task.title}
+    </h3>
 
-        {/* Description */}
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          {task.description}
-        </p>
+    {formattedDueDate && (
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <CalendarDays className="h-4 w-4" />
+        <span>Due {formattedDueDate}</span>
+      </div>
+    )}
+  </div>
 
-        {/* Actions */}
-        <div className="flex justify-between items-center pt-2">
-          <Button
-            size="sm"
-            variant={task.completed ? "secondary" : "default"}
-            onClick={() => onToggleComplete(task.id)}
-          >
-            {task.completed ? "Completed" : "Mark Done"}
-          </Button>
+  <Badge
+    className={`inline-flex items-center gap-1.5 rounded-full border text-[10px] sm:text-xs tracking-wide px-2 py-1 ${priorityStyles[task.priority]}`}
+  >
+    <span
+      className={`inline-block h-2.5 w-2.5 rounded-full ${
+        task.priority === "high"
+          ? "bg-rose-600"
+          : task.priority === "medium"
+          ? "bg-amber-600"
+          : "bg-emerald-600"
+      }`}
+    />
+    <span className="capitalize">{task.priority}</span>
+  </Badge>
+</div>
 
-          <div className="flex gap-2">
-            <Button size="icon" variant="outline" onClick={() => onEdit(task)}>
-              <Pencil size={16} />
-            </Button>
-            <Button size="icon" variant="destructive" onClick={() => onDelete(task)}>
-              <Trash size={16} />
-            </Button>
-          </div>
-        </div>
+{/* Description */}
+{task.description ? (
+  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+    {task.description}
+  </p>
+) : (
+  <p className="text-sm text-muted-foreground italic">
+    No description provided.
+  </p>
+)}
 
-      </CardContent>
+{/* Actions */}
+<div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-3">
+  <Button
+    size="sm"
+    variant={task.completed ? "secondary" : "default"}
+    onClick={() => onToggleComplete(task.id)}
+    className="gap-1"
+  >
+    <CheckCircle2 className="h-4 w-4" />
+    {task.completed ? "Completed" : "Mark done"}
+  </Button>
+
+  <div className="flex gap-2">
+    <Button
+      size="icon"
+      variant="outline"
+      onClick={() => onEdit(task)}
+      className="rounded-full"
+    >
+      <Pencil size={15} />
+    </Button>
+    <Button
+      size="icon"
+      variant="destructive"
+      onClick={() => onDelete(task)}
+      className="rounded-full"
+    >
+      <Trash size={15} />
+    </Button>
+  </div>
+</div>
+
+</CardContent>
+
     </Card>
   );
 };

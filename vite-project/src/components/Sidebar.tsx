@@ -41,19 +41,31 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, on
     >
       <div className="p-4">
         {/* Header with menu toggle and branding */}
-        <div className="flex items-center gap-3 mb-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggle}
-            className="h-10 w-10 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          >
-            <Menu size={20} />
-          </Button>
-            {isOpen && (
-              <h1 className="text-xl font-bold text-sidebar-foreground">TaskMaster</h1>
-            )}
-        </div>
+        {/* Header with menu toggle and branding */}
+<div className="flex items-center gap-3 mb-8">
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={onToggle}
+    className="h-10 w-10 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+  >
+    <Menu size={20} />
+  </Button>
+
+  {isOpen && (
+    <div className="flex items-center gap-2">
+      <img 
+        src="/tick.svg" 
+        alt="Logo"
+        className="h-6 w-6"
+      />
+      <h1 className="text-xl font-bold text-sidebar-foreground">
+        TaskMaster
+      </h1>
+    </div>
+  )}
+</div>
+
 
         {/* Navigation menu */}
         <nav className="space-y-2">

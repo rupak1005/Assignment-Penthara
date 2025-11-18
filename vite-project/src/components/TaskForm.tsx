@@ -92,99 +92,101 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, task }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="p-6 sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="mb-4">
-          <DialogTitle className="text-xl font-semibold">
-            {task ? 'Edit Task' : 'Add New Task'}
-          </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            {task
-              ? 'Update the task details below'
-              : 'Fill the information to create a new task'}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="p-8 sm:p-8 sm:max-w-lg max-h-[90vh]">
+        <div className="space-y-5 ">
+          <DialogHeader className="mb-2 sm:mb-4">
+            <DialogTitle className="text-xl font-semibold">
+              {task ? 'Edit Task' : 'Add New Task'}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              {task
+                ? 'Update the task details below'
+                : 'Fill the information to create a new task'}
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div className="space-y-1.5">
-            <AnimatedInput
-              id="title"
-              name="title"
-              label="Task Title *"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 pb-2">
+            {/* Title */}
+            <div className="space-y-2">
+              <AnimatedInput
+                id="title"
+                name="title"
+                label="Task Title *"
+                value={formData.title}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          {/* Description */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="description"
-              className="text-sm font-medium block dark:text-gray-200"
-            >
-              Description
-            </label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Enter description (optional)"
-              value={formData.description}
-              onChange={handleChange}
-              rows={4}
-              className="resize-none"
-            />
-          </div>
+            {/* Description */}
+            <div className="space-y-2">
+              <label
+                htmlFor="description"
+                className="text-sm font-medium block dark:text-gray-200"
+              >
+                Description
+              </label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Enter description (optional)"
+                value={formData.description}
+                onChange={handleChange}
+                rows={4}
+                className="resize-none"
+              />
+            </div>
 
-          {/* Due Date */}
-          <div className="space-y-1.5">
-            <AnimatedInput
-              id="dueDate"
-              name="dueDate"
-              type="date"
-              label="Due Date"
-              value={formData.dueDate}
-              onChange={handleChange}
-            />
-          </div>
+            {/* Due Date */}
+            <div className="space-y-2">
+              <AnimatedInput
+                id="dueDate"
+                name="dueDate"
+                type="date"
+                label="Due Date"
+                value={formData.dueDate}
+                onChange={handleChange}
+              />
+            </div>
 
-          {/* Priority */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="priority"
-              className="text-sm font-medium block dark:text-gray-200 mb-2"
-            >
-              Priority
-            </label>
-            <Dropdown
-              options={[
-                { value: 'low', label: 'Low' },
-                { value: 'medium', label: 'Medium' },
-                { value: 'high', label: 'High' },
-              ]}
-              value={formData.priority}
-              onChange={(value) =>
-                setFormData((prev) => ({ ...prev, priority: value as 'low' | 'medium' | 'high' }))
-              }
-              placeholder="Select priority"
-            />
-          </div>
+            {/* Priority */}
+            <div className="space-y-2">
+              <label
+                htmlFor="priority"
+                className="text-sm font-medium block dark:text-gray-200 mb-2"
+              >
+                Priority
+              </label>
+              <Dropdown
+                options={[
+                  { value: 'low', label: 'Low' },
+                  { value: 'medium', label: 'Medium' },
+                  { value: 'high', label: 'High' },
+                ]}
+                value={formData.priority}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, priority: value as 'low' | 'medium' | 'high' }))
+                }
+                placeholder="Select priority"
+              />
+            </div>
 
-          {/* Footer */}
-          <DialogFooter className="mt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              className="px-4"
-            >
-              Cancel
-            </Button>
-            <Button type="submit" className="px-5">
-              {task ? 'Update Task' : 'Add Task'}
-            </Button>
-          </DialogFooter>
-        </form>
+            {/* Footer */}
+            <DialogFooter className="mt-2 gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                className="px-4"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="px-5">
+                {task ? 'Update Task' : 'Add Task'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

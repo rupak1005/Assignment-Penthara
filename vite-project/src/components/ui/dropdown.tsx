@@ -47,6 +47,8 @@ const Dropdown = React.forwardRef<HTMLDivElement, DropdownProps>(
       setIsOpen(false)
     }
 
+    const needsScroll = options.length > 6
+
     return (
       <div ref={dropdownRef} className={cn("relative w-full", className)}>
         <button
@@ -70,7 +72,12 @@ const Dropdown = React.forwardRef<HTMLDivElement, DropdownProps>(
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 rounded-md border bg-background shadow-lg max-h-60 overflow-auto">
+          <div
+            className={cn(
+              "absolute z-50 w-full mt-1 rounded-md border bg-background shadow-lg py-1",
+              needsScroll ? "max-h-60 overflow-auto" : "max-h-none overflow-visible"
+            )}
+          >
             {options.map((option) => (
               <button
                 key={option.value}

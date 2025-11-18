@@ -86,7 +86,7 @@ const TaskList: React.FC<TaskListProps> = ({
         children: (
           <div className={viewMode === 'grid' 
             ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
-            : "flex flex-col space-y-2 sm:space-y-3"
+            : "flex flex-col space-y-2 sm:space-y-3 h-full gap-2"
           }>
             {tasks.map((task) => (
               <TaskItem
@@ -176,13 +176,13 @@ const TaskList: React.FC<TaskListProps> = ({
 
       {/* Task List with Accordion Grouping */}
       {accordionItems.length > 0 ? (
-        <div className="animate-fadeIn">
+        <div className="animate-fadeIn bg-sidebar">
           <Accordion items={accordionItems} allowMultiple={true} />
         </div>
       ) : (
         <div className="animate-fadeIn">
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+            <div className="grid grid-cols-1 gap-4  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {filteredTasks.map((task) => (
                 <TaskItem
                   key={task.id}

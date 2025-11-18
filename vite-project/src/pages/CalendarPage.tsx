@@ -127,7 +127,7 @@ const CalendarPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 ">
         <h2 className="text-3xl font-bold dark:text-gray-100">Calendar</h2>
         <Button variant="outline" onClick={() => {setCurrentDate(new Date()); setSelectedDate(new Date());}}>
           Today
@@ -137,7 +137,7 @@ const CalendarPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Calendar Card */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-sidebar dark:bg-sidebar-accent">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{monthYear}</CardTitle>
@@ -161,11 +161,11 @@ const CalendarPage: React.FC = () => {
           <CardContent>
 
             {/* Week Days */}
-            <div className="grid grid-cols-7 mb-2">
+            <div className="grid grid-cols-7 mb-2 ">
               {weekDays.map((d) => (
                 <div
                   key={d}
-                  className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 p-2"
+                  className="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 p-2"
                 >
                   {d}
                 </div>
@@ -173,7 +173,7 @@ const CalendarPage: React.FC = () => {
             </div>
 
             {/* Calendar Days */}
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-1 text-xs sm:text-sm">
               {calendarDays.map((day, idx) => {
                 const taskList = getTasksForDate(day.date);
                 const isSelected =
@@ -206,10 +206,10 @@ const CalendarPage: React.FC = () => {
                     {taskList.length > 0 && (
                       <div className="flex gap-1 mt-2 flex-wrap">
                         {taskList.slice(0, 3).map((_, i) => (
-                          <div key={i} className="w-2 h-2 rounded-full bg-blue-500" />
+                          <div key={i} className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400" />
                         ))}
                         {taskList.length > 3 && (
-                          <span className="text-xs text-gray-500">+{taskList.length - 3}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 ">+{taskList.length - 3}</span>
                         )}
                       </div>
                     )}
@@ -222,15 +222,15 @@ const CalendarPage: React.FC = () => {
         </Card>
 
         {/* Upcoming Tasks */}
-        <Card>
+        <Card className="bg-sidebar dark:bg-sidebar-accent">
           <CardHeader>
             <CardTitle>Upcoming Tasks</CardTitle>
           </CardHeader>
           <CardContent>
             {upcomingTasks.length === 0 ? (
-              <p className="text-center text-gray-500 dark:text-gray-400 py-8">No upcoming tasks</p>
+              <p className="text-center text-gray-500 dark:text-gray-400 py-8 ">No upcoming tasks</p>
             ) : (
-              <div className="space-y-4 max-h-[600px] overflow-y-auto">
+              <div className="space-y-4 max-h-[600px] overflow-y-auto text-xs sm:text-sm bg">
                 {upcomingTasks.map((task) => (
                   <div key={task.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-sidebar-accent transition">
                     <div className="flex justify-between mb-2">
@@ -256,7 +256,7 @@ const CalendarPage: React.FC = () => {
 
         {/* Selected Day Tasks */}
         {selectedDate && (
-          <Card className="lg:col-span-3">
+          <Card className="lg:col-span-3 bg-sidebar dark:bg-sidebar-accent">
             <CardHeader>
               <CardTitle>
                 Tasks on{" "}
