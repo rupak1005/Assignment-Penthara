@@ -225,7 +225,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen  bg-background text-foreground">
       {/* 
         Backdrop overlay for mobile devices
         When sidebar is open on mobile, show a semi-transparent dark overlay
@@ -262,11 +262,15 @@ const App: React.FC = () => {
         
         The transition-all makes the margin change smooth when sidebar opens/closes.
       */}
-      <div className={`transition-all duration-300 ml-0 ${
-        isSidebarOpen 
-          ? 'md:ml-64'   // Full sidebar width on desktop when open
-          : 'md:ml-16'   // Collapsed sidebar width on desktop when closed
-      }`}>
+      <div
+        className={`transition-all duration-300 ${
+          !isSidebarOpen && isMobile ? 'ml-12' : 'ml-12'
+        } ${
+          isSidebarOpen
+            ? 'md:ml-64' // Full sidebar width on desktop when open
+            : 'md:ml-16' // Collapsed sidebar width on desktop when closed
+        }`}
+      >
         {/* 
           Header Bar
           Contains search bar, theme toggle, and user info.
@@ -277,6 +281,7 @@ const App: React.FC = () => {
           onSearchChange={handleSearchChange}
           theme={theme}
           onToggleTheme={handleToggleTheme}
+          isMobile={isMobile}
         />
 
         {/* 

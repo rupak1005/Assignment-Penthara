@@ -14,6 +14,7 @@ import { NumberFlow } from "@/components/ui/number-flow";
 import { DynamicIsland } from "@/components/ui/dynamic-island";
 import { getTasks } from "@/services/taskService";
 import type { Task } from "@/services/taskService";
+import { parseDateOnly } from "@/lib/utils";
 
 const DashboardPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -71,22 +72,27 @@ const DashboardPage: React.FC = () => {
   today.setHours(0, 0, 0, 0);
   const dueToday = tasks.filter((t) => {
     if (!t.dueDate || t.completed) return false;
-    const due = new Date(t.dueDate);
-    due.setHours(0, 0, 0, 0);
+    const due = parseDateOnly(t.dueDate);
+    if (!due) return false;
     return due.getTime() === today.getTime();
   }).length;
 
   const nextDueTask = tasks
     .filter((t) => t.dueDate && !t.completed)
-    .sort(
-      (a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime()
-    )[0];
+    .sort((a, b) => {
+      const dateA = parseDateOnly(a.dueDate);
+      const dateB = parseDateOnly(b.dueDate);
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      return dateA.getTime() - dateB.getTime();
+    })[0];
   const nextDueLabel = nextDueTask
-    ? new Date(nextDueTask.dueDate!).toLocaleDateString("en-US", {
+    ? parseDateOnly(nextDueTask.dueDate!)?.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         weekday: "short",
-      })
+      }) ?? "No upcoming deadlines"
     : "No upcoming deadlines";
 
   const statusChartData = [
@@ -123,13 +129,13 @@ const DashboardPage: React.FC = () => {
   // Get upcoming tasks for Dynamic Island
   const upcomingTasksCount = tasks.filter((t) => {
     if (!t.dueDate || t.completed) return false;
-    const due = new Date(t.dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    due.setHours(0, 0, 0, 0);
-    return (
-      due >= today && due <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-    );
+    const due = parseDateOnly(t.dueDate);
+    if (!due) return false;
+    const todayLocal = new Date();
+    todayLocal.setHours(0, 0, 0, 0);
+    const sevenDaysOut = new Date(todayLocal);
+    sevenDaysOut.setDate(sevenDaysOut.getDate() + 7);
+    return due >= todayLocal && due <= sevenDaysOut;
   }).length;
 
   return (

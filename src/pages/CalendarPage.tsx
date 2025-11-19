@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getTasks } from '@/services/taskService';
 import type { Task } from '@/services/taskService';
+import { formatDateKey, parseDateOnly } from '@/lib/utils';
 
 const CalendarPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -27,8 +28,8 @@ const CalendarPage: React.FC = () => {
 
   /** Helper: tasks for a particular date */
   const getTasksForDate = (date: Date): Task[] => {
-    const dateStr = date.toISOString().split("T")[0];
-    return tasks.filter((t) => t.dueDate === dateStr);
+    const dateStr = formatDateKey(date);
+    return tasks.filter((t) => t.dueDate && t.dueDate === dateStr);
   };
 
   /** Calendar Grid Generation */
@@ -94,11 +95,16 @@ const CalendarPage: React.FC = () => {
     return tasks
       .filter((t) => {
         if (!t.dueDate || t.completed) return false;
-        const due = new Date(t.dueDate);
-        due.setHours(0, 0, 0, 0);
+        const due = parseDateOnly(t.dueDate);
+        if (!due) return false;
         return due >= today;
       })
-      .sort((a, b) => +new Date(a.dueDate!) - +new Date(b.dueDate!))
+      .sort((a, b) => {
+        const dateA = parseDateOnly(a.dueDate);
+        const dateB = parseDateOnly(b.dueDate);
+        if (!dateA || !dateB) return 0;
+        return dateA.getTime() - dateB.getTime();
+      })
       .slice(0, 10);
   };
 
@@ -123,6 +129,11 @@ const CalendarPage: React.FC = () => {
   });
 
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const priorityDotClasses: Record<Task["priority"], string> = {
+    high: "bg-red-500 dark:bg-red-400",
+    medium: "bg-amber-500 dark:bg-amber-400",
+    low: "bg-emerald-500 dark:bg-emerald-400",
+  };
 
   return (
     <div className="space-y-6">
@@ -205,8 +216,12 @@ const CalendarPage: React.FC = () => {
                     {/* task dots */}
                     {taskList.length > 0 && (
                       <div className="flex gap-1 mt-2 flex-wrap">
-                        {taskList.slice(0, 3).map((_, i) => (
-                          <div key={i} className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400" />
+                        {taskList.slice(0, 3).map((task, i) => (
+                          <div
+                            key={i}
+                            className={`w-2 h-2 rounded-full ${priorityDotClasses[task.priority]}`}
+                            title={task.title}
+                          />
                         ))}
                         {taskList.length > 3 && (
                           <span className="text-xs text-gray-500 dark:text-gray-400 ">+{taskList.length - 3}</span>
@@ -245,7 +260,7 @@ const CalendarPage: React.FC = () => {
                     )}
 
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Due: {new Date(task.dueDate!).toLocaleDateString()}
+                      Due: {parseDateOnly(task.dueDate!)?.toLocaleDateString() ?? "N/A"}
                     </p>
                   </div>
                 ))}

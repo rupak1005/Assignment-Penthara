@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash, CalendarDays, CheckCircle2 } from "lucide-react";
 import type { Task } from "@/services/taskService";
+import { parseDateOnly } from "@/lib/utils";
 
 const priorityStyles: Record<string, string> = {
   low: "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-200",
@@ -19,8 +20,9 @@ interface Props {
 }
 
 const TaskItem: React.FC<Props> = ({ task, onToggleComplete, onEdit, onDelete }) => {
-  const formattedDueDate = task.dueDate
-    ? new Date(task.dueDate).toLocaleDateString(undefined, {
+  const dueDateObj = parseDateOnly(task.dueDate);
+  const formattedDueDate = dueDateObj
+    ? dueDateObj.toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
       })
@@ -29,7 +31,7 @@ const TaskItem: React.FC<Props> = ({ task, onToggleComplete, onEdit, onDelete })
   return (
     <Card
       className={`
-        group flex  min-w-[200px] flex-col rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm
+        group flex  flex-col rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm
         shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg
         ${task.completed ? "opacity-70" : "opacity-100"}
       `}

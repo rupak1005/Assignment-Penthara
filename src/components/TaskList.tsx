@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion } from '@/components/ui/accordion';
 import type { Task } from '@/services/taskService';
 import TaskItem from './TaskItem';
+import { parseDateOnly } from '@/lib/utils';
 
 interface TaskListProps {
   tasks: Task[];                                    // The tasks to display (already filtered by search/priority)
@@ -115,9 +116,12 @@ const TaskList: React.FC<TaskListProps> = ({
         return;  // Skip to next task
       }
 
-      // Parse the due date and set time to midnight for comparison
-      const dueDate = new Date(task.dueDate);
-      dueDate.setHours(0, 0, 0, 0);
+      // Parse the due date and compare using local time
+      const dueDate = parseDateOnly(task.dueDate);
+      if (!dueDate) {
+        groups['No Date'].push(task);
+        return;
+      }
 
       // Categorize the task based on when it's due
       if (dueDate.getTime() === today.getTime()) {
@@ -162,9 +166,8 @@ const TaskList: React.FC<TaskListProps> = ({
         // The content of the accordion section - the actual task cards/list items
         children: (
           <div className={viewMode === 'grid' 
-            // Grid view: responsive grid that adapts to screen size
-            // 1 column on mobile, 2 on small screens, 3 on medium, etc.
-            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
+            // Grid view: keep cards at a maximum of two columns for a zoomed-in feel
+            ? "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
             // List view: vertical stack of tasks
             : "flex flex-col space-y-2 sm:space-y-3 h-full gap-2"
           }>
@@ -291,7 +294,7 @@ const TaskList: React.FC<TaskListProps> = ({
       ) : (
         <div className="animate-fadeIn">
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 gap-4  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {filteredTasks.map((task) => (
                 <TaskItem
                   key={task.id}
