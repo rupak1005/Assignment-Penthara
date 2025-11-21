@@ -446,8 +446,8 @@ Currently, no environment variables are required. All configuration is handled t
 ## Screenshots
 
 The project includes screenshots in the `/screenshots` directory:
-- ![Dashboard view](/screenshots/dashboard.png)
-- ![Calendar view](/screenshots/calender.png)
+- ![Dashboard view](/frontend/screenshots/dashboard.png)
+- ![Calendar view](/frontend/screenshots/calender.png)
 <img width="1600" height="1611" alt="image" src="https://github.com/user-attachments/assets/85a20d2d-5a40-45d1-bb32-2e21ff83e10d" />
 
 - ![Light and dark mode examples](screenshots/lightmode.png)
