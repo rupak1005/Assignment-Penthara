@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Search, Bell, Mail, User, Sun, Moon } from 'lucide-react';
+import { Search,User, Sun, Moon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -65,22 +65,6 @@ const Header: React.FC<HeaderProps> = ({
             onClick={onToggleTheme}
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Notifications"
-            className="dark:text-gray-100 hidden sm:block md:p-2 justify-center items-center"
-          >
-            <Bell size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Messages"
-            className="dark:text-gray-100 hidden sm:block md:p-2 justify-center items-center"
-          >
-            <Mail size={20} />
           </Button>
           <div className="flex items-center gap-4 dark:text-gray-100">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center dark:bg-sidebar-accent ">

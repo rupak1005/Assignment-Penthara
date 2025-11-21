@@ -36,19 +36,19 @@ const App: React.FC = () => {
   // State to track which page we're currently viewing
   // 'tasks' is the default page when app first loads
   const [currentView, setCurrentView] = useState('tasks');
-  
+
   // Stores the search text that user types in the header search bar
   // This gets passed down to TasksPage to filter tasks
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Theme state - 'light' or 'dark'
   // We start with 'light' but will check localStorage and system preference
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  
+
   // Controls whether the sidebar is expanded or collapsed
   // On desktop, it starts open. On mobile, we'll close it automatically
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  
+
   // Tracks if user is on a mobile device (screen width < 768px)
   // This helps us adjust the UI behavior for mobile vs desktop
   const [isMobile, setIsMobile] = useState(false);
@@ -81,15 +81,15 @@ const App: React.FC = () => {
   useEffect(() => {
     // Safety check: make sure we're in the browser (not server-side rendering)
     if (typeof window === 'undefined') return;
-    
+
     // Try to get the theme from browser's local storage
     // This remembers user's choice even after closing the browser
     const storedTheme = localStorage.getItem('theme');
-    
+
     // If we found a valid saved theme, use it
     if (storedTheme === 'light' || storedTheme === 'dark') {
       setTheme(storedTheme);
-    } 
+    }
     // Otherwise, check if user's system is set to dark mode
     // This is a nice touch - respects user's OS-level preference
     else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -127,10 +127,10 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     // Get the root HTML element (<html> tag)
     const root = document.documentElement;
-    
+
     // Add or remove the 'dark' class based on current theme
     // Tailwind CSS will automatically apply dark mode styles when this class exists
     if (theme === 'dark') {
@@ -138,7 +138,7 @@ const App: React.FC = () => {
     } else {
       root.classList.remove('dark');
     }
-    
+
     // Save the current theme to localStorage so it persists
     // Next time user visits, we'll load this preference
     localStorage.setItem('theme', theme);
@@ -156,13 +156,13 @@ const App: React.FC = () => {
    */
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     // Function to check if current screen width is mobile-sized
     // 768px is Tailwind's 'md' breakpoint - below this is considered mobile
     const checkMobile = () => {
       const mobile = window.innerWidth < 768; // md breakpoint
       setIsMobile(mobile);
-      
+
       // If mobile, close sidebar. If desktop, open it.
       // This gives mobile users more screen space for content
       if (mobile) {
@@ -178,7 +178,7 @@ const App: React.FC = () => {
     // Also check whenever user resizes the window
     // This handles cases like rotating phone or resizing browser window
     window.addEventListener('resize', checkMobile);
-    
+
     // Cleanup: remove the event listener when component unmounts
     // This prevents memory leaks
     return () => window.removeEventListener('resize', checkMobile);
@@ -205,7 +205,7 @@ const App: React.FC = () => {
   const handleViewChange = (view: string) => {
     // Update which page we're showing
     setCurrentView(view);
-    
+
     // If user is on mobile, close the sidebar after they select a page
     // This gives them more room to see the content they just navigated to
     if (isMobile) {
@@ -250,16 +250,16 @@ const App: React.FC = () => {
       case 'dashboard':
         // Show the analytics dashboard with charts and stats
         return <DashboardPage token={authToken} />;
-      
+
       case 'tasks':
         // Show the main tasks page, and pass along the search query
         // so it can filter tasks as user types
         return <TasksPage searchQuery={searchQuery} token={authToken} />;
-      
+
       case 'calendar':
         // Show the calendar view
         return <CalendarPage token={authToken} />;
-      
+
       case 'team':
       case 'settings':
       default:
@@ -274,7 +274,7 @@ const App: React.FC = () => {
   };
 
   if (!authToken && !isLoadingSession) {
-    return <LoginPage onAuthSuccess={handleAuthSuccess} />;
+    return <LoginPage onAuthSuccess={handleAuthSuccess} theme={theme} onToggleTheme={handleToggleTheme} />;
   }
 
   return (
@@ -316,13 +316,11 @@ const App: React.FC = () => {
         The transition-all makes the margin change smooth when sidebar opens/closes.
       */}
       <div
-        className={`transition-all duration-300 ${
-          !isSidebarOpen && isMobile ? 'ml-12' : 'ml-12'
-        } ${
-          isSidebarOpen
+        className={`transition-all duration-300 ${!isSidebarOpen && isMobile ? 'ml-12' : 'ml-12'
+          } ${isSidebarOpen
             ? 'md:ml-64' // Full sidebar width on desktop when open
             : 'md:ml-16' // Collapsed sidebar width on desktop when closed
-        }`}
+          }`}
       >
         {/* 
           Header Bar

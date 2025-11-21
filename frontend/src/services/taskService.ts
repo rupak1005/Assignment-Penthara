@@ -28,6 +28,11 @@ const handleResponse = async <T>(response: globalThis.Response): Promise<T> => {
   return data as T;
 };
 
+/**
+ * Fetch all tasks for the authenticated user
+ * @param {string} token - The JWT auth token
+ * @returns {Promise<Task[]>} List of tasks
+ */
 export const fetchTasks = async (token: string): Promise<Task[]> => {
   const response = await fetch(`${API_BASE_URL}/tasks`, {
     headers: withAuth(token),
@@ -35,6 +40,12 @@ export const fetchTasks = async (token: string): Promise<Task[]> => {
   return handleResponse<Task[]>(response);
 };
 
+/**
+ * Create a new task
+ * @param {TaskPayload} payload - The task data (title, description, etc.)
+ * @param {string} token - The JWT auth token
+ * @returns {Promise<Task>} The created task
+ */
 export const createTask = async (
   payload: TaskPayload,
   token: string
@@ -52,6 +63,13 @@ export const createTask = async (
   return handleResponse<Task>(response);
 };
 
+/**
+ * Update an existing task
+ * @param {string} id - The task ID
+ * @param {Partial<TaskPayload & { completed: boolean }>} updates - The fields to update
+ * @param {string} token - The JWT auth token
+ * @returns {Promise<Task>} The updated task
+ */
 export const updateTask = async (
   id: string,
   updates: Partial<TaskPayload & { completed: boolean }>,
@@ -71,6 +89,12 @@ export const updateTask = async (
   return handleResponse<Task>(response);
 };
 
+/**
+ * Delete a task
+ * @param {string} id - The task ID
+ * @param {string} token - The JWT auth token
+ * @returns {Promise<void>}
+ */
 export const deleteTask = async (id: string, token: string): Promise<void> => {
   const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
     method: "DELETE",
@@ -84,6 +108,12 @@ export const deleteTask = async (id: string, token: string): Promise<void> => {
   }
 };
 
+/**
+ * Toggle task completion status
+ * @param {string} id - The task ID
+ * @param {string} token - The JWT auth token
+ * @returns {Promise<Task>} The updated task
+ */
 export const toggleTaskComplete = async (
   id: string,
   token: string

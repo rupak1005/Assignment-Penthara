@@ -19,21 +19,32 @@ interface PublicUser {
   email: string;
 }
 
+// Helper to normalize email addresses to lowercase and trimmed
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
+// Helper to create a signed JWT token for a user
 const createToken = (user: JwtUserPayload) =>
   jwt.sign(user, env.jwtSecret, { expiresIn: "7d" });
 
+/**
+ * Registers a new user.
+ * Validates input, checks for existing email, hashes password, and creates user.
+ * @param {Request} req - Express request object containing name, email, and password in body
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} JSON response with user data and token or error message
+ */
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
+    // Basic validation
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email, and password required" });
     }
 
     const cleanEmail = normalizeEmail(email);
 
+    // Check if user already exists
     const existing = await query<DbUser>("SELECT id FROM users WHERE email = $1", [
       cleanEmail,
     ]);
@@ -41,9 +52,11 @@ export const register = async (req: Request, res: Response) => {
       return res.status(409).json({ message: "Email already registered" });
     }
 
+    // Hash password for security
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = uuidv4();
 
+    // Insert new user into database
     const inserted = await query<PublicUser>(
       `INSERT INTO users (id, name, email, password)
        VALUES ($1, $2, $3, $4)
@@ -56,6 +69,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Failed to create account" });
     }
 
+    // Generate JWT token
     const token = createToken(user);
 
     return res.status(201).json({ user, token });
@@ -65,6 +79,13 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Authenticates a user.
+ * Verifies email and password, and returns a JWT token if successful.
+ * @param {Request} req - Express request object containing email and password
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} JSON response with user data and token or error message
+ */
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -75,6 +96,7 @@ export const login = async (req: Request, res: Response) => {
 
     const cleanEmail = normalizeEmail(email);
 
+    // Find user by email
     const result = await query<DbUser>("SELECT * FROM users WHERE email = $1", [
       cleanEmail,
     ]);
@@ -84,11 +106,13 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Verify password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Create user payload for token
     const payload: JwtUserPayload = {
       id: user.id,
       name: user.name,
@@ -103,6 +127,13 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Retrieves current authenticated user's details.
+ * Uses the token from the Authorization header.
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} JSON response with user data
+ */
 export const me = async (req: Request, res: Response) => {
   try {
     const authHeader = req.headers.authorization;

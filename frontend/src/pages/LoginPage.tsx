@@ -4,12 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { login, register } from "@/services/authService";
 import type { AuthResponse } from "@/services/authService";
+import { Sun, Moon } from "lucide-react";
 
 interface LoginPageProps {
   onAuthSuccess: (data: AuthResponse) => void;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onAuthSuccess }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onAuthSuccess, theme, onToggleTheme }) => {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -37,7 +40,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onAuthSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 right-4"
+        onClick={onToggleTheme}
+        aria-label="Toggle theme"
+      >
+        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+      </Button>
       <Card className="max-w-md w-full shadow-lg border-border">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
@@ -103,8 +115,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onAuthSuccess }) => {
               {loading
                 ? "Please wait..."
                 : mode === "login"
-                ? "Log in"
-                : "Create account"}
+                  ? "Log in"
+                  : "Create account"}
             </Button>
           </form>
 
