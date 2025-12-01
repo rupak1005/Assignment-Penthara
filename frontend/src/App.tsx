@@ -61,6 +61,9 @@ const App: React.FC = () => {
   });
   const [isLoadingSession, setIsLoadingSession] = useState<boolean>(false);
 
+  // used useCallback to maintain referential equality. Since handleLogout is a dependency in my useEffect,
+  //  if I didn't wrap it in useCallback, it would be re-created on every render. 
+  // This would trick the useEffect into thinking it's a 'new' function, triggering it constantly and causing an infinite loop.
   const handleLogout = React.useCallback(() => {
     setAuthToken(null);
     setCurrentUser(null);
@@ -98,6 +101,7 @@ const App: React.FC = () => {
     // If nothing found, it stays as the default 'light' we set above
   }, []);
 
+  //This effect handles persisting the user session. If the user refreshes the page, we lose the React state. This code checks if we have a valid token, and if so, it fetches the user profile from the backend to restore the session. If the token is invalid/expired, it automatically logs the user out.
   useEffect(() => {
     const loadProfile = async () => {
       if (!authToken || currentUser) return;
@@ -117,14 +121,10 @@ const App: React.FC = () => {
     loadProfile();
   }, [authToken, currentUser, handleLogout]);
 
-  /**
-   * Whenever the theme changes, update the HTML element's class.
-   * 
-   * Tailwind CSS uses the 'dark' class on the root element to apply dark mode styles.
-   * We also save the theme to localStorage so it persists across page refreshes.
-   * 
-   * This runs every time 'theme' state changes
-   */
+  //Whenever the theme changes, update the HTML element's class.
+  //Tailwind CSS uses the 'dark' class on the root element to apply dark mode styles.
+  //We also save the theme to localStorage so it persists across page refreshes.
+  //This runs every time 'theme' state changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
 

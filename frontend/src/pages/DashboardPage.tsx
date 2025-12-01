@@ -21,10 +21,19 @@ interface DashboardPageProps {
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
+  // State to hold all tasks fetched from API
   const [tasks, setTasks] = useState<Task[]>([]);
+  
+  // Loading state for async data fetching
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  // Controls visibility of the "Dynamic Island" notification
   const [showNotification, setShowNotification] = useState(true);
 
+  /**
+   * Effect to fetch tasks on component mount.
+   * We need the full task list to calculate statistics.
+   */
   useEffect(() => {
     const loadTasks = async () => {
       try {
@@ -41,6 +50,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
     loadTasks();
   }, [token]);
 
+  /**
+   * Calculate high-level statistics from the tasks array.
+   * - Total: All tasks count
+   * - Completed: Tasks with completed: true
+   * - Pending: Tasks with completed: false
+   * - High Priority: Pending tasks with priority: 'high'
+   */
   const getStats = () => ({
     total: tasks.length,
     completed: tasks.filter((t) => t.completed).length,
@@ -49,12 +65,22 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
       .length,
   });
 
+  /**
+   * Calculate completion trend for the last 7 days.
+   * Returns an array of objects for the chart, each containing:
+   * - label: Short date (e.g., "Oct 25")
+   * - completed: Number of tasks completed on that day
+   */
   const getCompletionTrend = () => {
     return Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
+      // Go back 'i' days from today (0 to 6)
       date.setDate(date.getDate() - (6 - i));
       const dateStr = date.toISOString().split("T")[0];
 
+      // Count tasks completed on this specific date
+      // Note: This relies on 'createdAt' for simplicity in this demo,
+      // but ideally would use a 'completedAt' timestamp if available.
       const completedOnDay = tasks.filter((task) => {
         if (!task.completed || !task.createdAt) return false;
         return new Date(task.createdAt).toISOString().split("T")[0] === dateStr;
@@ -78,12 +104,18 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
     });
   };
 
+  // Calculate derived statistics for UI display
   const stats = getStats();
   const completionTrend = getCompletionTrend();
+  
+  // Calculate percentage of tasks completed (0-100)
   const completionPercent =
     stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+    
   const remainingTasks = Math.max(stats.total - stats.completed, 0);
   const highPriorityPending = stats.highPriority;
+  
+  // Calculate tasks due specifically today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const dueToday = tasks.filter((t) => {
@@ -93,6 +125,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
     return due.getTime() === today.getTime();
   }).length;
 
+  // Find the very next upcoming deadline
   const nextDueTask = tasks
     .filter((t) => t.dueDate && !t.completed)
     .sort((a, b) => {
@@ -103,6 +136,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
       if (!dateB) return -1;
       return dateA.getTime() - dateB.getTime();
     })[0];
+    
   const nextDueLabel = nextDueTask
     ? parseDateOnly(nextDueTask.dueDate!)?.toLocaleDateString("en-US", {
         month: "short",
@@ -111,11 +145,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
       }) ?? "No upcoming deadlines"
     : "No upcoming deadlines";
 
+  // Data for the Pie/Donut chart
   const statusChartData = [
     { name: "Completed", value: stats.completed },
     { name: "Pending", value: stats.pending },
   ];
 
+  // Calculate percentage change in completion rate (Trend)
   const completionTrendChange =
     completionTrend.length > 1 && completionTrend[0].completed !== 0
       ? ((completionTrend[completionTrend.length - 1].completed -
@@ -134,6 +170,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
     0
   );
 
+  // Find the day with the most completed tasks
   const peakDay = completionTrend.reduce((best, current) =>
     current.completed > best.completed ? current : best
   );
@@ -143,6 +180,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
     : "0";
 
   // Get upcoming tasks for Dynamic Island
+  // Get upcoming tasks count for the "Dynamic Island" notification
+  // Checks for tasks due within the next 7 days
   const upcomingTasksCount = tasks.filter((t) => {
     if (!t.dueDate || t.completed) return false;
     const due = parseDateOnly(t.dueDate);
@@ -188,7 +227,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ">
         {/* TOTAL TASKS */}
-        <Card className="backdrop-blur-lg bg-white/50 dark:bg-[#1b1d24]/60 border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition bg-sidebar dark:bg-sidebar-accent">
+        <Card className="backdrop-blur-lg bg-sidebar dark:bg-sidebar-accent border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition">
           <CardHeader className="pb-1">
             <CardTitle className="text-sm text-accent-foreground">
               Total Tasks
@@ -202,7 +241,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
         </Card>
 
         {/* COMPLETED */}
-        <Card className="backdrop-blur-lg bg-white/50 dark:bg-[#1b1d24]/60 border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition bg-sidebar dark:bg-sidebar-accent">
+        <Card className="backdrop-blur-lg bg-sidebar dark:bg-sidebar-accent border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition">
           <CardHeader className="pb-1">
             <CardTitle className="text-sm text-accent-foreground">
               Completed
@@ -216,7 +255,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
         </Card>
 
         {/* PENDING */}
-        <Card className="backdrop-blur-lg bg-white/50 dark:bg-[#1b1d24]/60 border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition bg-sidebar dark:bg-sidebar-accent">
+        <Card className="backdrop-blur-lg bg-sidebar dark:bg-sidebar-accent border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition bg-sidebar dark:bg-sidebar-accent">
           <CardHeader className="pb-1">
             <CardTitle className="text-sm text-accent-foreground">
               Pending
@@ -230,7 +269,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ token }) => {
         </Card>
 
         {/* HIGH PRIORITY */}
-        <Card className="backdrop-blur-lg bg-white/50 dark:bg-[#1b1d24]/60 border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition bg-sidebar dark:bg-sidebar-accent">
+        <Card className="backdrop-blur-lg bg-sidebar dark:bg-sidebar-accent border border-gray-200/40 dark:border-gray-700/40 shadow-md hover:shadow-lg transition bg-sidebar dark:bg-sidebar-accent">
           <CardHeader className="pb-1">
             <CardTitle className="text-sm text-accent-foreground">
               High Priority

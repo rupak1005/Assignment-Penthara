@@ -20,21 +20,36 @@ interface CalendarPageProps {
 }
 
 const CalendarPage: React.FC<CalendarPageProps> = ({ token }) => {
+  // State to hold the list of tasks fetched from the backend
   const [tasks, setTasks] = useState<Task[]>([]);
+  
+  // Loading state to show a spinner or loading message while fetching data
   const [loading, setLoading] = useState<boolean>(true);
+  
+  // Error state to display if something goes wrong during fetching
   const [error, setError] = useState<string | null>(null);
+  
+  // The date currently being viewed in the calendar (determines month/year shown)
   const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // The specific date selected by the user (to show tasks for that day)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   /** Load tasks */
+  /** 
+   * Effect to load tasks from the API when the component mounts or token changes.
+   * We need all tasks to populate the calendar indicators.
+   */
   useEffect(() => {
     const loadTasks = async () => {
       try {
         setLoading(true);
         setError(null);
+        // Fetch all tasks from the backend
         const loaded = await fetchTasks(token);
         setTasks(loaded);
       } catch (err) {
+        console.error("Failed to load tasks", err);
         setError(err instanceof Error ? err.message : 'Failed to load tasks');
       } finally {
         setLoading(false);
@@ -45,19 +60,36 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ token }) => {
   }, [token]);
 
   /** Helper: tasks for a particular date */
+  /** 
+   * Helper function to filter tasks for a specific date.
+   * Compares the task's due date string with the formatted date key.
+   * @param {Date} date - The date to check for tasks
+   */
   const getTasksForDate = (date: Date): Task[] => {
-    const dateStr = formatDateKey(date);
+    const dateStr = formatDateKey(date); // Utility to format date as YYYY-MM-DD
     return tasks.filter((t) => t.dueDate && t.dueDate === dateStr);
   };
 
   /** Calendar Grid Generation */
+  /** 
+   * Generate the grid of days for the calendar view.
+   * This includes:
+   * 1. Days from the previous month (padding)
+   * 2. Days of the current month
+   * 3. Days from the next month (padding to fill the grid)
+   * 
+   * Uses useMemo to recalculate only when currentDate changes.
+   */
   const calendarDays = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
+    // Get the first and last day of the current month
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
     const daysInMonth = last.getDate();
+    
+    // Determine which day of the week the month starts on (0 = Sunday)
     const startOffset = first.getDay();
 
     const today = new Date();
@@ -68,16 +100,17 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ token }) => {
       isToday: boolean;
     }[] = [];
 
-    /** Previous Month Padding */
+    /** Previous Month Padding: Fill in days from the end of the previous month */
     const prevMonthLast = new Date(year, month, 0);
     for (let i = startOffset - 1; i >= 0; i--) {
       const d = new Date(year, month - 1, prevMonthLast.getDate() - i);
       grid.push({ date: d, isCurrentMonth: false, isToday: false });
     }
 
-    /** Current Month */
+    /** Current Month: Add all days of the current month */
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
+      // Check if this date is today
       const isToday =
         dateObj.getDate() === today.getDate() &&
         dateObj.getMonth() === today.getMonth() &&
@@ -90,7 +123,7 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ token }) => {
       });
     }
 
-    /** Next Month Padding */
+    /** Next Month Padding: Fill the rest of the grid (usually 42 cells total for 6 rows) */
     while (grid.length < 42) {
       const d = new Date(year, month + 1, grid.length - (startOffset + daysInMonth) + 1);
       grid.push({ date: d, isCurrentMonth: false, isToday: false });
@@ -100,12 +133,25 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ token }) => {
   }, [currentDate]);
 
   /** Selected date task list */
+  /** 
+   * Memoized list of tasks for the currently selected date.
+   * Updates whenever selectedDate or the tasks list changes.
+   */
   const selectedDayTasks = useMemo(() => {
     if (!selectedDate) return [];
     return getTasksForDate(selectedDate);
   }, [selectedDate, tasks]);
 
   /** Upcoming tasks list */
+  /** 
+   * Filter and sort tasks to show "Upcoming" tasks.
+   * Criteria:
+   * - Has a due date
+   * - Not completed
+   * - Due date is today or in the future
+   * - Sorted by due date (soonest first)
+   * - Limited to top 10
+   */
   const getUpcomingTasks = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
